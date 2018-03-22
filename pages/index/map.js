@@ -85,6 +85,7 @@ Page({
       success: function (res) {
         this.setData({
           'map.markers': [{
+            id:0,
             latitude: 39.953,
             longitude: 116.378,
             iconPath: res.tempFilePath,
@@ -113,11 +114,52 @@ Page({
     setTimeout(function () {
       //要延时执行的代码
       setInterval(function () {
+        this.mapCtx.moveToLocation()
+      }.bind(this), 1000) //循环时间 这里是1秒   
+      setInterval(function(){
+        wx.getLocation({
+          type: 'wgs84',
+          success: function (res) {
+            wx.request({
+              url: 'https://maps.cc/wx/get.php',//自己的服务接口地址
+              method: 'get',
+              header: {
+                'content-type': 'application/x-www-form-urlencoded'
+              },
+              data: res,
+              success: function (data) {
+                //4.解密成功后 获取自己服务器返回的结果
+                if (data.data.status == 1) {
+                  console.log(data)
+                  for (var i = 0; i < data.data.count; i++) {
+                    console.log(i)
+                    this.mapCtx.translateMarker({
+                      markerId: data.data.friend[i].id,
+                      autoRotate: true,
+                      duration: 1000,
+                      destination: {
+                        latitude: data.data.friend[i].latitude,
+                        longitude: data.data.friend[i].longitude,
+                      },
+                      animationEnd() {
+                        console.log('animation end')
+                      }
+                    }) 
+                  }
 
-        console.log("tt")
-         
-      }.bind(this), 10000) //循环时间 这里是1秒   
+                } else {
+                  console.log('解密失败')
+                }
 
+              }.bind(this),
+              fail: function () {
+                console.log('系统错误')
+              }
+            })
+          }.bind(this)
+        })
+        
+      }.bind(this), 1000)
     }.bind(this), 2000)
      
     
