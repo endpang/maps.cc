@@ -85,10 +85,10 @@ Page({
       success: function (res) {
         this.setData({
           'map.markers': [{
-            id:0,
+            id: 0,
             latitude: 39.953,
             longitude: 116.378,
-            iconPath: res.tempFilePath,
+            //iconPath: res.tempFilePath,
             name: "公司",
             desc: "天音通信",
             width: 50,
@@ -118,7 +118,7 @@ Page({
       }.bind(this), 1000) //循环时间 这里是1秒   
       setInterval(function(){
         wx.getLocation({
-          type: 'wgs84',
+          type: 'gcj02',
           success: function (res) {
             wx.request({
               url: 'https://maps.cc/wx/get.php',//自己的服务接口地址
@@ -130,12 +130,12 @@ Page({
               success: function (data) {
                 //4.解密成功后 获取自己服务器返回的结果
                 if (data.data.status == 1) {
-                  console.log(data)
+                  //console.log(data)
                   for (var i = 0; i < data.data.count; i++) {
-                    console.log(i)
+                    console.log(data.data.friend[i].id)
                     this.mapCtx.translateMarker({
-                      markerId: data.data.friend[i].id,
-                      autoRotate: true,
+                      markerId: 0,
+                      autoRotate: false,
                       duration: 1000,
                       destination: {
                         latitude: data.data.friend[i].latitude,
@@ -143,6 +143,9 @@ Page({
                       },
                       animationEnd() {
                         console.log('animation end')
+                      },
+                      fail: function (e) {
+                        console.log(e)
                       }
                     }) 
                   }
@@ -159,7 +162,7 @@ Page({
           }.bind(this)
         })
         
-      }.bind(this), 1000)
+      }.bind(this), 10000)
     }.bind(this), 2000)
      
     
