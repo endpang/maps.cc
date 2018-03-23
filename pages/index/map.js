@@ -92,14 +92,15 @@ Page({
 
           console.log("count",data.data.count)
           for (var i = 0; i < data.data.count; ++i) {
+            console.log("outi",i)
             console.log("friend",data.data.friend[i])  
             wx.downloadFile({
               url: 'https://maps.cc/345.png',
               type: 'audio',
               success: function (res) {                
-                console.log("id", i)
+                console.log("ini", i)
                 console.log("res", res.tempFilePath)
-                this.data.map.markers[i] = {
+                this.data.map.markers[i-1] = {
                   id: data.data.friend[i].marid,
                   latitude: data.data.friend[i].latitude,
                   longitude: data.data.friend[i].longitude,
@@ -111,7 +112,7 @@ Page({
                 }
                 
                 
-              }.bind(this),
+              }.bind(this,i,data),
               fail: function(e){
                 console.log("download error",e)
               }
