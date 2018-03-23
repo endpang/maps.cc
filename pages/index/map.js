@@ -85,10 +85,10 @@ Page({
       success: function (res) {
         this.setData({
           'map.markers': [{
-            id: 0,
-            latitude: 39.953,
-            longitude: 116.378,
-            //iconPath: res.tempFilePath,
+            id: 1,
+            latitude: 39.853,
+            longitude: 116.278,
+            iconPath: res.tempFilePath,
             name: "公司",
             desc: "天音通信",
             width: 50,
@@ -96,6 +96,7 @@ Page({
           }],
           'map.hasMarkers': true//解决方案  
         })
+        
         //console.log(res)
       }.bind(this)
     })
@@ -105,18 +106,37 @@ Page({
       //要延时执行的代码
       this.mapCtx.moveToLocation()
       
-    }.bind(this), 200)
+    }.bind(this), 200) 
+    /** 
     setTimeout(function () {
       //要延时执行的代码
       this.getCenterLocation()
-
-    }.bind(this), 1000)
+      this.mapCtx.translateMarker({
+        markerId: 1,
+        autoRotate: false,
+        //duration: 1000,
+        destination: {
+          latitude: 39.95,
+          longitude: 116.37,
+        },
+        animationEnd() {
+          console.log('animation end')
+        },
+        fail: function (e) {
+          console.log(e)
+        }
+      })
+    }.bind(this), 10000)
+    //*/
     setTimeout(function () {
       //要延时执行的代码
       setInterval(function () {
         this.mapCtx.moveToLocation()
-      }.bind(this), 1000) //循环时间 这里是1秒   
+      }.bind(this), 1000) //循环时间 这里是1秒  
+
       setInterval(function(){
+        //console.log("map", this.mapCtx)
+        /**/
         wx.getLocation({
           type: 'gcj02',
           success: function (res) {
@@ -132,11 +152,11 @@ Page({
                 if (data.data.status == 1) {
                   //console.log(data)
                   for (var i = 0; i < data.data.count; i++) {
-                    console.log(data.data.friend[i].id)
+                    console.log(data.data.friend[i].latitude, data.data.friend[i].longitude)
                     this.mapCtx.translateMarker({
-                      markerId: 0,
+                      markerId: data.data.friend[i].id,
                       autoRotate: false,
-                      duration: 1000,
+                      //duration: 1000,
                       destination: {
                         latitude: data.data.friend[i].latitude,
                         longitude: data.data.friend[i].longitude,
@@ -161,9 +181,10 @@ Page({
             })
           }.bind(this)
         })
+        //*/
         
-      }.bind(this), 10000)
-    }.bind(this), 2000)
+      }.bind(this), 2000)
+    }.bind(this), 10000)
      
     
   },
