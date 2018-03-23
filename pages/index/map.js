@@ -1,5 +1,6 @@
 // map.js
 const app = getApp()
+
 Page({
   /**
   data: {
@@ -75,10 +76,65 @@ Page({
           console.log('登陆失败')
         }
       })
-
+ 
     }
-  
+    wx.request({
+      url: 'https://maps.cc/wx/friend.php',//自己的服务接口地址
+      method: 'get',
+      header: {
+        'content-type': 'application/x-www-form-urlencoded'
+      },
+      data: {id:app.globalData.openid},
+      success: function (data) {
+        console.log(data)
+        //4.解密成功后 获取自己服务器返回的结果
+        if (data.data.status == 1) {
+
+          console.log("count",data.data.count)
+          for (var i = 0; i < data.data.count; ++i) {
+            console.log("friend",data.data.friend[i])  
+            wx.downloadFile({
+              url: 'https://maps.cc/345.png',
+              type: 'audio',
+              success: function (res) {                
+                console.log("id", i)
+                console.log("res", res.tempFilePath)
+                this.data.map.markers[i] = {
+                  id: data.data.friend[i].marid,
+                  latitude: data.data.friend[i].latitude,
+                  longitude: data.data.friend[i].longitude,
+                  //iconPath: res.tempFilePath,
+                  name: data.data.friend[i].name,
+                  desc: data.data.friend[i].desc,
+                  width: 50,
+                  height: 50
+                }
+                
+                
+              }.bind(this),
+              fail: function(e){
+                console.log("download error",e)
+              }
+            })            
+          }
+          setTimeout(function () {
+            console.log("outmar", this.data.map.markers)
+            this.setData({
+              'map.hasMarkers': true//解决方案  
+            })
+          }.bind(this),5000)
+
+        } else {
+          console.log('解密失败')
+        }
+
+      }.bind(this),
+      fail: function () {
+        console.log('系统错误')
+      }
+    })
     //地图初始化
+    /** 
     wx.downloadFile({
       url: 'https://maps.cc/345.png',
       type: 'audio',
@@ -100,6 +156,7 @@ Page({
         //console.log(res)
       }.bind(this)
     })
+    //*/
     this.mapCtx = wx.createMapContext('myMap')
     //this.getCenterLocation
     setTimeout(function () {
