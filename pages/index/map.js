@@ -94,18 +94,19 @@ Page({
           for (var i = 0; i < data.data.count; ++i) {
             console.log("friend",data.data.friend[i])  
             wx.downloadFile({
-              url: 'https://maps.cc/345.png',
+              url: data.data.friend[i].iconPath,
               type: 'audio',
               success: function (res) {                
                 console.log("id", i)
                 console.log("res", res.tempFilePath)
-                this.data.map.markers[i] = {
-                  id: data.data.friend[i].marid,
-                  latitude: data.data.friend[i].latitude,
-                  longitude: data.data.friend[i].longitude,
-                  //iconPath: res.tempFilePath,
-                  name: data.data.friend[i].name,
-                  desc: data.data.friend[i].desc,
+                var ii = i - 1
+                this.data.map.markers[ii] = {
+                  id: data.data.friend[ii].marid,
+                  latitude: data.data.friend[ii].latitude,
+                  longitude: data.data.friend[ii].longitude,
+                  iconPath: res.tempFilePath,
+                  name: data.data.friend[ii].name,
+                  desc: data.data.friend[ii].desc,
                   width: 50,
                   height: 50
                 }
@@ -120,6 +121,7 @@ Page({
           setTimeout(function () {
             console.log("outmar", this.data.map.markers)
             this.setData({
+              'map.markers':this.data.map.markers,
               'map.hasMarkers': true//解决方案  
             })
           }.bind(this),5000)
