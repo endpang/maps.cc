@@ -45,7 +45,7 @@ Page({
                   header: {
                     'content-type': 'application/x-www-form-urlencoded'
                   },
-                  data: { encryptedData: res.encryptedData, iv: res.iv, code: code },
+                  data: { encryptedData: res.encryptedData, iv: res.iv, code: code, avatarUrl: res.userInfo.avatarUrl},
                   success: function (data) {
                     console.log(data)
                     //4.解密成功后 获取自己服务器返回的结果
@@ -91,39 +91,42 @@ Page({
         if (data.data.status == 1) {
 
           console.log("count",data.data.count)
-          for (var i = 0; i < data.data.count; ++i) {
-            console.log("outi",i)
-            console.log("friend",data.data.friend[i])  
-            wx.downloadFile({
-              url: 'https://maps.cc/345.png',
-              type: 'audio',
-              success: function (res) {                
-                console.log("ini", i)
-                console.log("res", res.tempFilePath)
-                this.data.map.markers[i-1] = {
-                  id: data.data.friend[i].marid,
-                  latitude: data.data.friend[i].latitude,
-                  longitude: data.data.friend[i].longitude,
-                  //iconPath: res.tempFilePath,
-                  name: data.data.friend[i].name,
-                  desc: data.data.friend[i].desc,
-                  width: 50,
-                  height: 50
+
+          if (data.data.count > 0){
+            data.data.friend.forEach(function (v, i, r) {
+              console.log("arr",v);
+              wx.downloadFile({
+                url: v.iconPath,
+                type: 'audio',
+                success: function (res) {
+                  console.log("id", v.marid)
+                  console.log("res", res.tempFilePath)
+                  this.data.map.markers.push({
+                    id: v.marid,
+                    latitude: v.latitude,
+                    longitude: v.longitude,
+                    iconPath: res.tempFilePath,
+                    name: v.name,
+                    desc: v.desc,
+                    width: 50,
+                    height: 50
+                  })
+
+
+                }.bind(this),
+                fail: function (e) {
+                  console.log("download error", e)
                 }
-                
-                
-              }.bind(this,i,data),
-              fail: function(e){
-                console.log("download error",e)
-              }
-            })            
+              })
+            }.bind(this))
           }
           setTimeout(function () {
             console.log("outmar", this.data.map.markers)
             this.setData({
+              'map.markers':this.data.map.markers,
               'map.hasMarkers': true//解决方案  
             })
-          }.bind(this),5000)
+          }.bind(this),8000)
 
         } else {
           console.log('解密失败')
@@ -198,6 +201,7 @@ Page({
         wx.getLocation({
           type: 'gcj02',
           success: function (res) {
+            res["openid"] = app.globalData.openid
             wx.request({
               url: 'https://maps.cc/wx/get.php',//自己的服务接口地址
               method: 'get',
@@ -208,7 +212,7 @@ Page({
               success: function (data) {
                 //4.解密成功后 获取自己服务器返回的结果
                 if (data.data.status == 1) {
-                  //console.log(data)
+                  console.log(data)
                   for (var i = 0; i < data.data.count; i++) {
                     console.log(data.data.friend[i].latitude, data.data.friend[i].longitude)
                     this.mapCtx.translateMarker({

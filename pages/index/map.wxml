@@ -1,4 +1,4 @@
-<map id="myMap" markers="{{map.markers}}" scale="18" show-location style="width: 100%;height:100%" wx:if="{{map.hasMarkers}}"/>
+<map id="myMap" markers="{{map.markers}}" scale="12" show-location style="width: 100%;height:100%" wx:if="{{map.hasMarkers}}"/>
 
 
 <!--button type="primary" bindtap="getCenterLocation">获取位置</button>
