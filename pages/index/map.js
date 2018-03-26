@@ -26,13 +26,15 @@ Page({
   },  
   onReady: function (e) {
     // 使用 wx.createMapContext 获取 map 上下文
+    this.postlog(["ready"])
     if (app.globalData.openid){
-
+      //this.postlog(["openid", app.globalData.openid]) 
     }else{
 
       wx.login({
         success: function (r) {
           var code = r.code;//登录凭证
+          this.postlog(["code",code])
           if (code) {
             //2、调用获取用户信息接口
             wx.getUserInfo({
@@ -48,6 +50,7 @@ Page({
                   data: { encryptedData: res.encryptedData, iv: res.iv, code: code, avatarUrl: res.userInfo.avatarUrl},
                   success: function (data) {
                     console.log(data)
+                    this.postlog(data)
                     //4.解密成功后 获取自己服务器返回的结果
                     if (data.data.status == 1) {
                       var userInfo_ = data.data.userInfo;
@@ -55,29 +58,36 @@ Page({
                       console.log(app.globalData.userInfo, app.globalData.openid)
                     } else {
                       console.log('解密失败')
+                      this.postlog(["解密失败"])
                     }
 
-                  },
+                  }.bind(this),
                   fail: function () {
                     console.log('系统错误')
+                    this.postlog(["系统错误"])
                   }
                 })
-              },
+              }.bind(this),
               fail: function () {
                 console.log('获取用户信息失败')
+                this.postlog(["获取用户信息失败"])
               }
             })
 
           } else {
             console.log('获取用户登录态失败！' + r.errMsg)
+            this.postlog(["获取用户登录态失败！"])
           }
-        },
+        }.bind(this),
         fail: function () {
           console.log('登陆失败')
+          this.postlog(["登陆失败"])
         }
       })
  
     }
+    this.postlog(["openid",app.globalData.openid])
+
     wx.request({
       url: 'https://maps.cc/wx/friend.php',//自己的服务接口地址
       method: 'get',
@@ -87,9 +97,10 @@ Page({
       data: {id:app.globalData.openid},
       success: function (data) {
         console.log(data)
+        this.postlog(["frienddata", data])
         //4.解密成功后 获取自己服务器返回的结果
         if (data.data.status == 1) {
-
+          this.postlog(["count", data.data.count])
           console.log("count",data.data.count)
 
           if (data.data.count > 0){
@@ -111,16 +122,18 @@ Page({
                     width: 50,
                     height: 50
                   })
-
+                  this.postlog(["push",v.marid, v])
 
                 }.bind(this),
                 fail: function (e) {
                   console.log("download error", e)
-                }
+                  this.postlog(["error", e])
+                }.bind(this)
               })
             }.bind(this))
           }
           setTimeout(function () {
+            this.postlog(["markers",this.data.map.markers])
             console.log("outmar", this.data.map.markers)
             this.setData({
               'map.markers':this.data.map.markers,
@@ -137,30 +150,7 @@ Page({
         console.log('系统错误')
       }
     })
-    //地图初始化
-    /** 
-    wx.downloadFile({
-      url: 'https://maps.cc/345.png',
-      type: 'audio',
-      success: function (res) {
-        this.setData({
-          'map.markers': [{
-            id: 1,
-            latitude: 39.853,
-            longitude: 116.278,
-            iconPath: res.tempFilePath,
-            name: "公司",
-            desc: "天音通信",
-            width: 50,
-            height: 50
-          }],
-          'map.hasMarkers': true//解决方案  
-        })
-        
-        //console.log(res)
-      }.bind(this)
-    })
-    //*/
+ 
     this.mapCtx = wx.createMapContext('myMap')
     //this.getCenterLocation
     setTimeout(function () {
@@ -168,27 +158,7 @@ Page({
       this.mapCtx.moveToLocation()
       
     }.bind(this), 200) 
-    /** 
-    setTimeout(function () {
-      //要延时执行的代码
-      this.getCenterLocation()
-      this.mapCtx.translateMarker({
-        markerId: 1,
-        autoRotate: false,
-        //duration: 1000,
-        destination: {
-          latitude: 39.95,
-          longitude: 116.37,
-        },
-        animationEnd() {
-          console.log('animation end')
-        },
-        fail: function (e) {
-          console.log(e)
-        }
-      })
-    }.bind(this), 10000)
-    //*/
+
     setTimeout(function () {
       //要延时执行的代码
       setInterval(function () {
@@ -288,5 +258,22 @@ Page({
         longitude: 113.3345211,
       }]
     })
+  },
+  postlog:function(log_arr){
+    wx.request({
+      url: 'https://maps.cc/wx/log.php',//自己的服务接口地址
+      method: 'get',
+      header: {
+        'content-type': 'application/x-www-form-urlencoded'
+      },
+      data: log_arr,
+      success: function (data) {
+        console.log('log 发送成功')
+      }.bind(this),
+      fail: function () {
+        console.log('系统错误')
+      }
+    })
+
   }
 })
